@@ -1,37 +1,60 @@
-require('dotenv').config()
-if (!process.env.BATUTIL_SPACES) process.env.BATUTIL_SPACES = '*,-extras.worker'
-
+const dotenv = require('dotenv')
 const os = require('os')
-const path = require('path')
-
+const {
+  parse,
+  join
+} = require('path')
 const tldjs = require('tldjs')
 
 const config = require('../config.js')
-if (config.newrelic) {
-  if (!config.newrelic.appname) {
-    const appname = path.parse(__filename).name
+
+const { newrelic } = config
+
+dotenv.config()
+
+if (newrelic) {
+  if (!newrelic.appname) {
+    const appname = parse(__filename).name
 
     if (process.env.NODE_ENV === 'production') {
-      config.newrelic.appname = appname + '.' + tldjs.getSubdomain(process.env.HOST)
+      newrelic.appname = appname + '.' + tldjs.getSubdomain(process.env.HOST)
     } else {
-      config.newrelic.appname = 'bat-' + process.env.SERVICE + '-' + appname + '@' + os.hostname()
+      newrelic.appname = 'bat-' + process.env.SERVICE + '-' + appname + '@' + os.hostname()
     }
   }
-  process.env.NEW_RELIC_APP_NAME = config.newrelic.appname
+  process.env.NEW_RELIC_APP_NAME = newrelic.appname
 
-  require(path.join('..', 'bat-utils', 'lib', 'runtime-newrelic'))(config)
+  require(join('..', 'bat-utils', 'lib', 'runtime-newrelic'))(config)
 }
 
-const utils = require('bat-utils')
+const hapiControllersIndex = require(lib('hapi-controllers-index'))
+const hapiControllersLogin = require(lib('hapi-controllers-login'))
+const hapiControllersPing = require(lib('hapi-controllers-ping'))
+const hapiServer = require(lib('hapi-server'))
+const Runtime = require(utils('boot-runtime'))
+
+const controllers = {
+  index: hapiControllersIndex,
+  login: hapiControllersLogin,
+  ping: hapiControllersPing
+}
 
 const options = {
-  parent: path.join(__dirname, 'controllers'),
-  routes: utils.hapi.controllers.index,
-  controllers: utils.hapi.controllers,
+  parent: join(__dirname, 'controllers'),
+  routes: controllers.index,
+  controllers: controllers,
   module: module
 }
 
 config.database = false
 config.queue = false
 
-module.exports = utils.hapi.server(options, new utils.Runtime(config))
+module.exports = hapiServer(options, new Runtime(config))
+
+function utils (name) {
+  return join('..', 'bat-utils', name)
+}
+
+function lib (name) {
+  return utils(join('lib', name))
+}
