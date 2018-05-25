@@ -8,7 +8,7 @@ const npminfo = require('../npminfo')
 
 module.exports = Slack
 
-function Slack(config, runtime) {
+function Slack (config, runtime) {
   if (!(this instanceof Slack)) return new Slack(config, runtime)
 
   if (!config.slack) throw new Error('config.slack undefined')
