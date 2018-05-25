@@ -3,7 +3,6 @@ const path = require('path')
 
 const SDebug = require('sdebug')
 const _ = require('underscore')
-const enabled = require('./enabled')
 
 const cache = require('./lib/runtime-cache')
 const currency = require('./lib/runtime-currency')
@@ -65,7 +64,7 @@ function Runtime (config) {
 
 function reduction (config) {
   return (memo, key) => {
-    if (!config[key] || !enabled('runtime.' + key)) {
+    if (!config[key]) {
       return memo
     }
     const Fn = hash[key]
