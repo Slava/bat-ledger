@@ -428,6 +428,19 @@ const quanta = async (debug, runtime, qid) => {
 
     if (!surveyor) return debug('missing surveyor.surveyorId', { surveyorId: quantum._id })
 
+    const { surveyorId, frozen } = surveyor
+    if (frozen) {
+      let where = {
+        surveyorId
+      }
+      let data = {
+        $unset: {
+          probi: null
+        }
+      }
+      return voting.update(where, data)
+    }
+
     quantum.created = createdTimestamp(surveyor._id)
     quantum.modified = (surveyor.timestamp.high_ * 1000) + (surveyor.timestamp.low_ / bson.Timestamp.TWO_PWR_32_DBL_)
 
@@ -461,17 +474,6 @@ const quanta = async (debug, runtime, qid) => {
     surveyor = await surveyors.findOne({ surveyorId: quantum._id })
     if (surveyor) {
       quantum.modified = (surveyor.timestamp.high_ * 1000) + (surveyor.timestamp.low_ / bson.Timestamp.TWO_PWR_32_DBL_)
-      if (!surveyor.frozen) {
-        return
-      }
-      let { surveyorId } = surveyor
-      let where = { surveyorId }
-      let data = {
-        $unset: {
-          probi: null
-        }
-      }
-      await voting.update(where, data)
     }
   }
 
