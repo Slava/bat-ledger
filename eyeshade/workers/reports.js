@@ -461,6 +461,17 @@ const quanta = async (debug, runtime, qid) => {
     surveyor = await surveyors.findOne({ surveyorId: quantum._id })
     if (surveyor) {
       quantum.modified = (surveyor.timestamp.high_ * 1000) + (surveyor.timestamp.low_ / bson.Timestamp.TWO_PWR_32_DBL_)
+      if (!surveyor.frozen) {
+        return
+      }
+      let { surveyorId } = surveyor
+      let where = { surveyorId }
+      let data = {
+        $unset: {
+          probi: null
+        }
+      }
+      await voting.update(where, data)
     }
   }
 
