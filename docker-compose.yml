@@ -17,6 +17,14 @@ services:
     image: redis:latest
     networks:
       - ledger
+  eyeshade-postgres:
+    container_name: eyeshade-postgres
+    image: postgres:10.4
+    networks:
+      - ledger
+    environment:
+      - "POSTGRES_USER=eyeshade"
+      - "POSTGRES_PASSWORD=password"
   eyeshade-worker:
     container_name: eyeshade-worker
     command: "npm run eyeshade-worker"
@@ -24,11 +32,13 @@ services:
       file: base.yml
       service: ledger
     environment:
+      - "DATABASE_URL=postgres://eyeshade:password@eyeshade-postgres/eyeshade"
       - "MONGODB_URI=mongodb://mongo/eyeshade"
       - "SERVICE=eyeshade"
     depends_on:
       - mongo
       - redis
+      - eyeshade-postgres
     networks:
       - ledger
   eyeshade-web:
@@ -40,11 +50,13 @@ services:
       file: base.yml
       service: ledger
     environment:
+      - "DATABASE_URL=postgres://eyeshade:password@eyeshade-postgres/eyeshade"
       - "MONGODB_URI=mongodb://mongo/eyeshade"
       - "SERVICE=eyeshade"
     depends_on:
       - mongo
       - redis
+      - eyeshade-postgres
     networks:
       - ledger
   ledger-worker:

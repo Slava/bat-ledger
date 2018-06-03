@@ -30,5 +30,6 @@ const options = {
 }
 
 config.cache = false
+config.pg = { schemaVersion: require('./migrations/current') }
 
 utils.extras.worker(options, new utils.Runtime(config))

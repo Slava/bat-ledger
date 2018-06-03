@@ -101,3 +101,17 @@ best to do in another terminal
 ```sh
 npm run docker-test
 ```
+
+### Postgres migrations
+
+You can run all migrations to upgrade the schema to the latest version using:
+
+```sh
+npm run docker-migrate-up
+```
+
+You can reverse a particular migration by running:
+
+```sh
+npm run docker-migrate-down -- migrations/0001_transactions/down.sql
+```
